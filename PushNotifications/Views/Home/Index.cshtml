@@ -1,0 +1,86 @@
+﻿@model PushNotifications.Models.PushNotificationModel
+@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="jumbotron">
+    <h1>Push Notifications</h1>
+    <p class="lead">Test for push notifications on browsers.</p>
+    <div>
+        <a href="#" class="btn btn-primary btn-lg" id="CheckBrowserSupport">Check Browser Support</a>
+        <a href="#" class="btn btn-primary btn-lg" id="RequestPermission">Request Permission</a>
+        <a href="#" class="btn btn-primary btn-lg" id="SubscribeNotification">Subscribe Notification</a>
+    </div>
+    <hr />
+    <form class="container col-md-12">
+        <p class="lead">Fire notification</p>
+        <div class="form-group">
+            <select id="SubscribedBrowsers" class="form-control">
+                <option value="">Select a browser</option>
+                @foreach (var browser in Model.Browsers)
+            {
+                <option>@browser</option>
+            }
+            </select>
+        </div>
+        <div class="form-group">
+            <input type="text" id="Title" value="Notification title" class="form-control"/>
+        </div>
+        <div class="form-group">
+            <textarea id="Message" rows="2" class="form-control">Notification message</textarea>
+        </div>
+        <div class="form-group">
+            <input type="text" id="URL" value="https://developers.google.com/web/ilt/pwa/introduction-to-push-notifications" class="form-control"/>
+        </div>
+        <p><a href="#" class="btn btn-primary btn-lg" id="FireNotification">Fire Notification</a></p>
+    </form>
+</div>
+
+
+<script src="~/Scripts/jquery-1.10.2.min.js"></script>
+<script src="~/Scripts/service-worker.js"></script>
+<script src="~/Scripts/PushNotification.js"></script>
+
+<script type="text/javascript">
+    $(function () {
+        pushNotification.start('@Model.ApplicationPublicKey');
+
+        $('#CheckBrowserSupport').click(function () {
+            if (pushNotification.validateBrowserPermissions())
+                alert('Browser has support.');
+
+            return false;
+        });
+
+        $('#RequestPermission').click(function () {
+            hasPermission = pushNotification.askPermission();
+
+            if (hasPermission)
+                alert('User granted permission.');
+
+            return false;
+        });
+
+        $('#SubscribeNotification').click(function () {
+            pushNotification.subscribeUserToPush(function () { window.location.href = '/Home/Index' });
+
+            return false;
+        });
+
+
+        $('#FireNotification').click(function () {
+            var browser = $('#SubscribedBrowsers').val();
+            var message = $('#Message').val();
+            var url = $('#URL').val();
+            var title = $('#Title').val();
+
+            if (browser)
+                pushNotification.fireMessage(message, browser, url, title);
+            else
+                alert("Enter a browser to be notified.");
+
+            return false;
+        });
+
+    });
+</script>
